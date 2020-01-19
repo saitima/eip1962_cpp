@@ -15,10 +15,10 @@ var (
 	OPERATION_G2_MUL             = 0x05
 	OPERATION_G2_MULTIEXP        = 0x06
 	OPERATION_PAIRING            = 0x07
-	BLS12PAIR                    = 0x07
-	BNPAIR                       = 0x08
-	MNT4PAIR                     = 0x09
-	MNT6PAIR                     = 0x0a
+	BLS12PAIR                    = 0x01
+	BNPAIR                       = 0x02
+	MNT4PAIR                     = 0x03
+	MNT6PAIR                     = 0x04
 )
 
 type API struct{}
