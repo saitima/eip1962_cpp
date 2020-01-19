@@ -69,13 +69,7 @@ extern "C" {
 #endif
 
 
-/* Return type for Run */
-struct Run_return {
-	int r0;
-	char* r1;
-};
-
-extern struct Run_return Run(char* p0, int p1);
+extern int run(char* p0, GoUint32 p1, char* p2, GoUint32* p3, char* p4, GoUint32* p5);
 
 #ifdef __cplusplus
 }

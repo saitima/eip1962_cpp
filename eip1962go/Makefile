@@ -15,6 +15,9 @@ all: clean build test
 
 build: 
 		CGO_ENABLED=1 $(GOBUILD) -o $(LIB_DIR)/$(LIBARY_FULL_NAME) -buildmode=c-shared $(SRC)/main.go		
+build_static: 
+		CGO_ENABLED=1 $(GOBUILD) -o $(LIB_DIR)/$(LIBARY_FULL_NAME) -ldflags "-linkmode external -extldflags -static" $(SRC)/main.go	
+
 clean: 
 		$(GOCLEAN)
 		rm -f $(LIB_DIR)/*

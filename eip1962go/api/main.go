@@ -9,14 +9,24 @@ import (
 	"unsafe"
 )
 
-//export Run
-func Run(i *C.char, i_len C.int) (C.int, *C.char) {
-	buf := C.GoBytes(unsafe.Pointer(i), i_len)
+//export run
+func run(i *C.char, i_len uint32, o *C.char, o_len *uint32, e *C.char, e_len *uint32) C.int {
+	buf := C.GoBytes(unsafe.Pointer(i), C.int(i_len))
+	oBuff := C.GoBytes(unsafe.Pointer(o), C.int(768))
+	eBuff := C.GoBytes(unsafe.Pointer(e), C.int(256))
+
 	res, err := new(eip.API).Run(buf)
 	if err != nil {
-		return C.int(int(res[0])), C.CString(string(err.Error()))
+		err_desr := string(err.Error())
+		*e_len = uint32(len(err_desr))
+		copy(eBuff[0:], []byte(err_desr))
+		return 0
 	}
-	return C.int(int(res[0])), C.CString("")
+
+	o_bytes := res
+	*o_len = uint32(len(o_bytes))
+	copy(oBuff[0:], o_bytes)
+	return 1
 }
 
 func main() {}
