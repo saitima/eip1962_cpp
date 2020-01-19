@@ -8,33 +8,33 @@ import (
 var (
 	zero                         = []byte{0x00}
 	pairingError, pairingSuccess = []byte{0x00}, []byte{0x01}
+	OPERATION_G1_ADD             = 0x01
+	OPERATION_G1_MUL             = 0x02
+	OPERATION_G1_MULTIEXP        = 0x03
+	OPERATION_G2_ADD             = 0x04
+	OPERATION_G2_MUL             = 0x05
+	OPERATION_G2_MULTIEXP        = 0x06
+	OPERATION_PAIRING            = 0x07
+	BLS12PAIR                    = 0x07
+	BNPAIR                       = 0x08
+	MNT4PAIR                     = 0x09
+	MNT6PAIR                     = 0x0a
 )
 
 type API struct{}
 
-func (api *API) Run(in []byte) ([]byte, error) {
-	opTypeBuf, rest, err := split(in, BYTES_FOR_LENGTH_ENCODING)
-	if err != nil {
-		return zero, errors.New("Input should be longer than operation type encoding")
-	}
-	opType := opTypeBuf[0]
+func (api *API) Run(opType int, in []byte) ([]byte, error) {
 	switch opType {
-	case 0x01:
-		return new(g1Api).addPoints(rest)
-	case 0x02:
-		return new(g1Api).mulPoint(rest)
-	case 0x03:
-		return new(g1Api).multiExp(rest)
-	case 0x04, 0x05, 0x06:
-		return new(g2Api).run(opType, rest)
-	case 0x07:
-		return pairBLS(rest)
-	case 0x08:
-		return pairBN(rest)
-	case 0x09:
-		return pairMNT4(rest)
-	case 0x0a:
-		return pairMNT6(rest)
+	case OPERATION_G1_ADD:
+		return new(g1Api).addPoints(in)
+	case OPERATION_G1_MUL:
+		return new(g1Api).mulPoint(in)
+	case OPERATION_G1_MULTIEXP:
+		return new(g1Api).multiExp(in)
+	case OPERATION_G2_ADD, OPERATION_G2_MUL, OPERATION_G2_MULTIEXP:
+		return new(g2Api).run(opType, in)
+	case OPERATION_PAIRING:
+		return new(pairingAPI).run(in)
 	default:
 		return zero, errors.New("Unknown operation type")
 	}
@@ -176,7 +176,7 @@ func (api *g1Api) multiExp(in []byte) ([]byte, error) {
 
 type g2Api struct{}
 
-func (api *g2Api) run(opType byte, in []byte) ([]byte, error) {
+func (api *g2Api) run(opType int, in []byte) ([]byte, error) {
 	field, _, modulusLen, rest, err := parseBaseFieldFromEncoding(in)
 	if err != nil {
 		return nil, err
@@ -198,7 +198,7 @@ func (api *g2Api) run(opType byte, in []byte) ([]byte, error) {
 
 type g22Api struct{}
 
-func (api *g22Api) run(opType byte, field *field, modulusLen int, in []byte) ([]byte, error) {
+func (api *g22Api) run(opType int, field *field, modulusLen int, in []byte) ([]byte, error) {
 	switch opType {
 	case 0x04:
 		return api.addPoints(field, modulusLen, in)
@@ -344,7 +344,7 @@ func (api *g22Api) multiExp(field *field, modulusLen int, in []byte) ([]byte, er
 
 type g23Api struct{}
 
-func (api *g23Api) run(opType byte, field *field, modulusLen int, in []byte) ([]byte, error) {
+func (api *g23Api) run(opType int, field *field, modulusLen int, in []byte) ([]byte, error) {
 	switch opType {
 	case 0x04:
 		return api.addPoints(field, modulusLen, in)
@@ -486,6 +486,29 @@ func (api *g23Api) multiExp(field *field, modulusLen int, in []byte) ([]byte, er
 	g2.multiExp(p, bases, scalars)
 	out := g2.toBytes(p)
 	return out, nil
+}
+
+type pairingAPI struct{}
+
+func (api *pairingAPI) run(in []byte) ([]byte, error) {
+	curveTypeBuf, rest, err := split(in, BYTES_FOR_LENGTH_ENCODING)
+	if err != nil {
+		return zero, errors.New("Input should be longer than operation type encoding")
+	}
+	curveType := int(curveTypeBuf[0])
+	switch curveType {
+	case BLS12PAIR:
+		return pairBLS(rest)
+	case BNPAIR:
+		return pairBN(rest)
+	case MNT4PAIR:
+		return pairMNT4(rest)
+	case MNT6PAIR:
+		return pairMNT6(rest)
+	default:
+		return zero, errors.New("unknown curve type for pairing")
+	}
+	return zero, nil
 }
 
 func pairBN(in []byte) ([]byte, error) {
@@ -894,6 +917,7 @@ func pairMNT4(in []byte) ([]byte, error) {
 		return pairingError, err
 	}
 	if x.Uint64() == 0 {
+
 		return pairingError, errors.New("Ate pairing loop count parameters can not be zero")
 	}
 
