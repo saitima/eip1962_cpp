@@ -18,6 +18,10 @@ var (
 	OPERATION_BNPAIR             = 0x08
 	OPERATION_MNT4PAIR           = 0x09
 	OPERATION_MNT6PAIR           = 0x0a
+	BLS12PAIR          			 = 0x01
+	BNPAIR             			 = 0x02
+	MNT4PAIR           			 = 0x03
+	MNT6PAIR           			 = 0x04
 )
 
 type API struct{}
