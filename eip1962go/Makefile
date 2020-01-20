@@ -6,6 +6,7 @@ GOGET=$(GOCMD) get
 BIN=bin
 LIB_NAME=eip1962
 LIBARY_FULL_NAME=lib$(LIB_NAME).so
+ARCHIVE_FULL_NAME=lib$(LIB_NAME).a
 LIB_DIR=./lib
 SRC=api
 CXX=gcc
@@ -13,10 +14,21 @@ CXX_FLAGS := -L$(LIB_DIR) -l$(LIB_NAME) -I$(LIB_DIR)
 
 all: clean build test
 
+static: clean build_static
+
+external: clean build_external
+
+static_external: clean build_static_external
+
 build: 
 		CGO_ENABLED=1 $(GOBUILD) -o $(LIB_DIR)/$(LIBARY_FULL_NAME) -buildmode=c-shared $(SRC)/main.go		
 build_static: 
-		CGO_ENABLED=1 $(GOBUILD) -o $(LIB_DIR)/$(LIBARY_FULL_NAME) -ldflags "-linkmode external -extldflags -static" $(SRC)/main.go	
+		CGO_ENABLED=1 $(GOBUILD) -o $(LIB_DIR)/$(ARCHIVE_FULL_NAME) -buildmode=c-archive $(SRC)/main.go	
+build_external: 
+		CGO_ENABLED=1 $(GOBUILD) -o $(OUT_DIR)/$(LIBARY_FULL_NAME) -buildmode=c-shared $(SRC)/main.go	
+build_static_external: 
+		CGO_ENABLED=1 $(GOBUILD) -o $(OUT_DIR)/$(ARCHIVE_FULL_NAME) -buildmode=c-archive $(SRC)/main.go	
+
 
 clean: 
 		$(GOCLEAN)

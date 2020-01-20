@@ -31,8 +31,8 @@ int main()
   GoUint32 o_len = 0;
   GoUint32 e_len = 0;
   char op = 7; // pair BLS12
-  int success = c_run_operation(op, buf, len, o_buff, &o_len, e_buff, &e_len);
-  if(success == 0)
+  int error = c_perform_operation(op, buf, len, o_buff, &o_len, e_buff, &e_len);
+  if(error == 1)
   {
     printf("err: %s\n", e_buff);
     return 1;
