@@ -15,11 +15,12 @@ func run(i *C.char, i_len uint32, o *C.char, o_len *uint32, e *C.char, e_len *ui
 	oBuff := C.GoBytes(unsafe.Pointer(o), C.int(768))
 	eBuff := C.GoBytes(unsafe.Pointer(e), C.int(256))
 
-	res, err := new(eip.API).Run(buf)
+	opType := 7 // PAIRING
+	res, err := new(eip.API).Run(opType, buf)
 	if err != nil {
-		err_desr := string(err.Error())
-		*e_len = uint32(len(err_desr))
-		copy(eBuff[0:], []byte(err_desr))
+		errDesc := []byte(err.Error())
+		*e_len = uint32(len(errDesc))
+		copy(eBuff[0:], errDesc)
 		return 0
 	}
 
