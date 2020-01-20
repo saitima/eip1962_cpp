@@ -69,7 +69,7 @@ extern "C" {
 #endif
 
 
-extern int run(char* p0, GoUint32 p1, char* p2, GoUint32* p3, char* p4, GoUint32* p5);
+extern int c_run_operation(char p0, char* p1, GoUint32 p2, char* p3, GoUint32* p4, char* p5, GoUint32* p6);
 
 #ifdef __cplusplus
 }

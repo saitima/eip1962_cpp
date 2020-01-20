@@ -9,13 +9,13 @@ import (
 	"unsafe"
 )
 
-//export run
-func run(i *C.char, i_len uint32, o *C.char, o_len *uint32, e *C.char, e_len *uint32) C.int {
+//export c_run_operation
+func c_run_operation(op C.char, i *C.char, i_len uint32, o *C.char, o_len *uint32, e *C.char, e_len *uint32) C.int {
 	buf := C.GoBytes(unsafe.Pointer(i), C.int(i_len))
 	oBuff := C.GoBytes(unsafe.Pointer(o), C.int(768))
 	eBuff := C.GoBytes(unsafe.Pointer(e), C.int(256))
 
-	opType := 7 // PAIRING
+	opType := int(op)
 	res, err := new(eip.API).Run(opType, buf)
 	if err != nil {
 		errDesc := []byte(err.Error())
